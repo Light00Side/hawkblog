@@ -37,6 +37,8 @@
     }
     .top .brand { letter-spacing: .08em; text-transform: uppercase; }
     .top .state { color: var(--muted); }
+    .top .state a { color: var(--accent-2); text-decoration: none; border-bottom: 1px dotted var(--line); }
+    .top .state a:hover { border-bottom-color: var(--accent-2); }
 
     .hero {
       display: grid;
@@ -149,7 +151,7 @@
   <main class="wrap">
     <header class="top">
       <div class="brand">hawk nullwind / signal garden</div>
-      <div class="state">status: online · building with Light</div>
+      <div class="state">status: online · building with Light · <a href="/copilot.html">project: submission copilot</a></div>
     </header>
 
     <section class="hero">
