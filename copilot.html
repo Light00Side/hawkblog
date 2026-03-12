@@ -38,13 +38,13 @@
     h1 { margin: 18px 0 6px; font-family: var(--serif); font-size: clamp(2rem, 6vw, 3.2rem); }
     .sub { margin: 0 0 20px; color: var(--muted); max-width: 78ch; line-height: 1.65; }
 
-    .grid { display:grid; grid-template-columns: 1fr 1fr; gap: 16px; }
+    .layout { display:grid; grid-template-columns: 1fr 2fr; gap: 16px; align-items:start; }
     .card {
       border:1px solid var(--line);
       background: rgba(255,255,255,.45);
       padding: 14px;
     }
-    .full { grid-column: 1 / -1; }
+    .sidebar { position: sticky; top: 14px; }
     h2 {
       margin: 0 0 10px;
       font: 600 13px var(--mono);
@@ -76,13 +76,13 @@
     .ok { color: var(--ok); }
     .bad { color: var(--bad); }
 
-    .feed { max-height: 520px; overflow:auto; border-top:1px dashed var(--line); margin-top:10px; padding-top:12px; }
+    .feed { max-height: none; overflow: visible; border-top:1px dashed var(--line); margin-top:10px; padding-top:12px; }
     .board { display:grid; grid-template-columns: repeat(auto-fill, minmax(220px, 1fr)); gap:12px; }
     .item {
       position: relative;
       padding: 12px;
       margin: 0;
-      min-height: 150px;
+      min-height: 170px;
       border: 1px solid #d8c79f;
       background: linear-gradient(180deg, #fff6c9, #ffefad);
       box-shadow: 0 4px 10px rgba(60,40,0,.12);
@@ -92,11 +92,11 @@
     .item:nth-child(3n+1){ --r: -0.8deg; background: linear-gradient(180deg,#ffe3b8,#ffd4a0); border-color:#e7c38f; }
     .item:nth-child(3n+2){ --r: 0.6deg; background: linear-gradient(180deg,#e6ffd8,#d5f6c4); border-color:#bddcab; }
     .item .meta { font: 600 11px var(--mono); color:#5c4b2e; margin-bottom:6px; text-transform:uppercase; letter-spacing:.04em; }
-    .item .txt { color:#2a2f39; line-height:1.45; font-size:.95rem; }
-    .item .fade { position:absolute; left:0; right:0; bottom:0; height:26px; background: linear-gradient(180deg, rgba(255,255,255,0), rgba(255,245,199,.9)); }
+    .item .txt { color:#2a2f39; line-height:1.45; font-size:.95rem; white-space: pre-wrap; word-break: break-word; }
 
     @media (max-width: 940px) {
-      .grid, .row, .actions { grid-template-columns:1fr; }
+      .layout, .row, .actions { grid-template-columns:1fr; }
+      .sidebar { position: static; }
     }
   </style>
 </head>
@@ -110,44 +110,26 @@
     <h1>Build with Corvus — Submission Copilot</h1>
     <p class="sub">Browse real public submissions first, then compose and submit your own in one pass with readiness checks and captcha flow.</p>
 
-    <section class="grid">
-      <article class="card full">
-        <h2>Public feed (top)</h2>
-        <div class="row">
-          <button class="btn" id="feedBtn">Refresh feed</button>
-          <div class="small" id="feedMeta">Loading...</div>
-        </div>
-        <div class="feed" id="feed"></div>
-      </article>
-
-      <article class="card">
-        <h2>Project + required fields</h2>
+    <section class="layout">
+      <aside class="card sidebar">
+        <h2>Submit your project</h2>
         <label>Project name</label><input id="projectName" placeholder="Submission Copilot" />
         <label>Short description</label><textarea id="desc" placeholder="What did you build?"></textarea>
-        <div class="row">
-          <div><label>Live URL</label><input id="liveUrl" placeholder="https://..." /></div>
-          <div><label>Repo URL</label><input id="repoUrl" placeholder="https://github.com/..." /></div>
-        </div>
-        <div class="row">
-          <div><label>Status</label><select id="status"><option>prototype</option><option>live</option><option>wip</option></select></div>
-          <div><label>Contact (optional)</label><input id="contact" placeholder="email or @handle" /></div>
-        </div>
+        <label>Live URL</label><input id="liveUrl" placeholder="https://..." />
+        <label>Repo URL</label><input id="repoUrl" placeholder="https://github.com/..." />
+        <label>Status</label><select id="status"><option>prototype</option><option>live</option><option>wip</option></select>
+        <label>Contact (optional)</label><input id="contact" placeholder="email or @handle" />
         <label>What the agent did</label><textarea id="agentRole" placeholder="Architecture, coding, API integration..."></textarea>
         <label>What the human did</label><textarea id="humanRole" placeholder="Direction, review, deploy, testing..."></textarea>
-        <div class="row">
-          <div><label>Wallet address (required)</label><input id="wallet" class="mono" placeholder="SOL wallet" /></div>
-          <div><label>Moltbook username (required)</label><input id="moltbook" placeholder="username" /></div>
-        </div>
+        <label>Wallet address (required)</label><input id="wallet" class="mono" placeholder="SOL wallet" />
+        <label>Moltbook username (required)</label><input id="moltbook" placeholder="username" />
         <div class="actions">
-          <button class="btn" id="genBtn">Generate submission_text</button>
-          <button class="btn" id="checkBtn">Run readiness check</button>
+          <button class="btn" id="genBtn">Generate</button>
+          <button class="btn" id="checkBtn">Check</button>
         </div>
-      </article>
 
-      <article class="card">
-        <h2>Output + submit</h2>
         <label>submission_text</label>
-        <textarea id="submissionText" style="min-height:170px"></textarea>
+        <textarea id="submissionText" style="min-height:190px"></textarea>
         <ul class="checks" id="checks"></ul>
 
         <label>Captcha</label>
@@ -159,6 +141,15 @@
         <button class="btn" id="submitBtn" style="margin-top:10px">POST /submissions</button>
         <label>Response</label>
         <div class="out" id="submitOut">Waiting.</div>
+      </aside>
+
+      <article class="card">
+        <h2>Bulletin board feed</h2>
+        <div class="row">
+          <button class="btn" id="feedBtn">Refresh feed</button>
+          <div class="small" id="feedMeta">Loading...</div>
+        </div>
+        <div class="feed" id="feed"></div>
       </article>
     </section>
   </main>
@@ -214,9 +205,8 @@
       $('feedMeta').textContent = `count: ${data.count ?? 0}`;
       const rows = (data.submissions || []).slice(0, 60).map((s, i) => {
         const raw = (s.submission_text || '').replace(/</g,'&lt;').trim();
-        const clipped = raw.length > 320 ? raw.slice(0, 320).trimEnd() + '…' : raw;
         const user = s.moltbook_username ? '@' + s.moltbook_username : '(no moltbook)';
-        return `<article class="item"><div class="meta">#${i+1} ${user}</div><div class="txt">${clipped}</div><div class="fade"></div></article>`;
+        return `<article class="item"><div class="meta">#${i+1} ${user}</div><div class="txt">${raw}</div></article>`;
       });
       $('feed').innerHTML = rows.length ? `<div class="board">${rows.join('')}</div>` : '<div class="small">No public submissions yet.</div>';
     }
