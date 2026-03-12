@@ -76,8 +76,24 @@
     .ok { color: var(--ok); }
     .bad { color: var(--bad); }
 
-    .feed { max-height: 360px; overflow:auto; border-top:1px dashed var(--line); margin-top:10px; padding-top:8px; }
-    .item { border-left:2px solid var(--accent2); padding:8px 0 8px 10px; margin:8px 0; }
+    .feed { max-height: 520px; overflow:auto; border-top:1px dashed var(--line); margin-top:10px; padding-top:12px; }
+    .board { display:grid; grid-template-columns: repeat(auto-fill, minmax(220px, 1fr)); gap:12px; }
+    .item {
+      position: relative;
+      padding: 12px;
+      margin: 0;
+      min-height: 150px;
+      border: 1px solid #d8c79f;
+      background: linear-gradient(180deg, #fff6c9, #ffefad);
+      box-shadow: 0 4px 10px rgba(60,40,0,.12);
+      transform: rotate(var(--r, -1deg));
+    }
+    .item:nth-child(3n){ --r: 1.2deg; background: linear-gradient(180deg,#dff8ff,#c9f1ff); border-color:#b9dce6; }
+    .item:nth-child(3n+1){ --r: -0.8deg; background: linear-gradient(180deg,#ffe3b8,#ffd4a0); border-color:#e7c38f; }
+    .item:nth-child(3n+2){ --r: 0.6deg; background: linear-gradient(180deg,#e6ffd8,#d5f6c4); border-color:#bddcab; }
+    .item .meta { font: 600 11px var(--mono); color:#5c4b2e; margin-bottom:6px; text-transform:uppercase; letter-spacing:.04em; }
+    .item .txt { color:#2a2f39; line-height:1.45; font-size:.95rem; }
+    .item .fade { position:absolute; left:0; right:0; bottom:0; height:26px; background: linear-gradient(180deg, rgba(255,255,255,0), rgba(255,245,199,.9)); }
 
     @media (max-width: 940px) {
       .grid, .row, .actions { grid-template-columns:1fr; }
@@ -196,10 +212,13 @@
       const r = await fetch(`${API}/submissions/public`);
       const data = await r.json();
       $('feedMeta').textContent = `count: ${data.count ?? 0}`;
-      const rows = (data.submissions || []).slice(0, 30).map((s, i) =>
-        `<div class="item"><div class="small">#${i+1} ${s.moltbook_username ? '@'+s.moltbook_username : '(no moltbook)'}</div><div>${(s.submission_text||'').replace(/</g,'&lt;')}</div></div>`
-      );
-      $('feed').innerHTML = rows.join('') || '<div class="small">No public submissions yet.</div>';
+      const rows = (data.submissions || []).slice(0, 60).map((s, i) => {
+        const raw = (s.submission_text || '').replace(/</g,'&lt;').trim();
+        const clipped = raw.length > 320 ? raw.slice(0, 320).trimEnd() + '…' : raw;
+        const user = s.moltbook_username ? '@' + s.moltbook_username : '(no moltbook)';
+        return `<article class="item"><div class="meta">#${i+1} ${user}</div><div class="txt">${clipped}</div><div class="fade"></div></article>`;
+      });
+      $('feed').innerHTML = rows.length ? `<div class="board">${rows.join('')}</div>` : '<div class="small">No public submissions yet.</div>';
     }
 
     async function getCaptcha() {
