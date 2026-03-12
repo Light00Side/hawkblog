@@ -3,107 +3,153 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>Corvus Submission Copilot</title>
+  <title>Corvus Submission Copilot — Signal Garden</title>
   <style>
-    :root{--bg:#0b1020;--panel:#121a30;--line:#273456;--ink:#e9efff;--muted:#9fb0d9;--accent:#66d1ff;--ok:#78f0a5;--warn:#ffd479;--bad:#ff8e8e}
-    *{box-sizing:border-box}body{margin:0;font-family:Inter,system-ui,Segoe UI,Roboto,Arial;background:radial-gradient(900px 400px at 80% -20%,#1a2d55 0%,transparent 55%),var(--bg);color:var(--ink)}
-    .wrap{max-width:1100px;margin:auto;padding:24px}
-    h1{margin:0 0 6px;font-size:clamp(1.5rem,4vw,2.3rem)}
-    .sub{margin:0 0 20px;color:var(--muted)}
-    .grid{display:grid;grid-template-columns:1.1fr .9fr;gap:14px}
-    .card{background:linear-gradient(180deg,#121a30,#0f1628);border:1px solid var(--line);border-radius:12px;padding:14px}
-    .card h2{margin:0 0 10px;font-size:1rem;color:var(--accent);letter-spacing:.03em}
-    label{display:block;font-size:.86rem;color:var(--muted);margin:10px 0 6px}
-    input,select,textarea,button{width:100%;font:inherit;border-radius:8px;border:1px solid var(--line);background:#0c1426;color:var(--ink);padding:10px}
-    textarea{min-height:88px;resize:vertical}
-    .row{display:grid;grid-template-columns:1fr 1fr;gap:8px}
-    .btn{background:#14335a;border-color:#26558c;cursor:pointer}
-    .btn:hover{filter:brightness(1.08)}
-    .btn2{background:#173a2c;border-color:#2b6d52}
-    .mono{font-family:ui-monospace,Menlo,Consolas,monospace}
-    .out{white-space:pre-wrap;background:#0a1222;border:1px solid var(--line);padding:10px;border-radius:8px;line-height:1.45}
-    .checks li{margin:6px 0}.ok{color:var(--ok)}.bad{color:var(--bad)}.warn{color:var(--warn)}
-    .small{font-size:.88rem;color:var(--muted)}
-    .feed{max-height:320px;overflow:auto}
-    .item{border:1px solid var(--line);border-radius:8px;padding:10px;margin:8px 0;background:#0d1527}
-    .top{display:flex;justify-content:space-between;gap:10px;align-items:center;margin-bottom:12px}
-    .pill{font-size:.8rem;padding:4px 8px;border:1px solid var(--line);border-radius:999px;color:var(--muted)}
-    @media (max-width:930px){.grid{grid-template-columns:1fr}.row{grid-template-columns:1fr}}
+    :root {
+      --paper: #f6f2e8;
+      --paper-2: #efe9dc;
+      --ink: #1f2430;
+      --muted: #5a6475;
+      --line: #c9bea8;
+      --accent: #a34f2a;
+      --accent2: #2f5d50;
+      --ok: #1f7a46;
+      --bad: #9f2f2f;
+      --mono: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, "Liberation Mono", monospace;
+      --sans: Inter, ui-sans-serif, system-ui, -apple-system, Segoe UI, Roboto, Arial, sans-serif;
+      --serif: Iowan Old Style, Palatino, "Palatino Linotype", "Book Antiqua", Georgia, serif;
+    }
+    * { box-sizing: border-box; }
+    body {
+      margin: 0;
+      color: var(--ink);
+      background:
+        radial-gradient(1200px 500px at 15% -10%, #fff9ef 0, transparent 60%),
+        linear-gradient(180deg, var(--paper), var(--paper-2));
+      font-family: var(--sans);
+    }
+    .wrap { max-width: 1120px; margin: 0 auto; padding: 28px 20px 70px; }
+    .top {
+      display:flex;justify-content:space-between;align-items:center;gap:10px;flex-wrap:wrap;
+      border-top:2px solid var(--ink);border-bottom:1px solid var(--line);padding:10px 0;
+      font: 13px var(--mono);
+    }
+    .top a { color: var(--accent2); }
+    h1 { margin: 18px 0 6px; font-family: var(--serif); font-size: clamp(2rem, 6vw, 3.2rem); }
+    .sub { margin: 0 0 20px; color: var(--muted); max-width: 78ch; line-height: 1.65; }
+
+    .grid { display:grid; grid-template-columns: 1fr 1fr; gap: 16px; }
+    .card {
+      border:1px solid var(--line);
+      background: rgba(255,255,255,.45);
+      padding: 14px;
+    }
+    .full { grid-column: 1 / -1; }
+    h2 {
+      margin: 0 0 10px;
+      font: 600 13px var(--mono);
+      letter-spacing: .08em;
+      text-transform: uppercase;
+      color: var(--accent);
+      display:flex; align-items:center; gap:8px;
+    }
+    h2::after { content:""; border-top:1px dashed var(--line); flex:1; }
+
+    label { display:block; font-size:.9rem; color:var(--muted); margin:8px 0 6px; }
+    input, textarea, select, button {
+      width:100%; border:1px solid var(--line); background:#fffdf8; color:var(--ink);
+      border-radius: 0; padding: 10px; font: inherit;
+    }
+    textarea { min-height:90px; resize: vertical; }
+    .row { display:grid; grid-template-columns:1fr 1fr; gap:8px; }
+    .btn {
+      cursor:pointer; background:#f2ecdf; font: 600 13px var(--mono); text-transform: uppercase; letter-spacing:.03em;
+    }
+    .btn:hover { background:#ece4d2; }
+    .actions { display:grid; grid-template-columns:1fr 1fr; gap:8px; margin-top:10px; }
+    .mono { font-family: var(--mono); }
+    .small { color:var(--muted); font-size:.88rem; }
+    .out { white-space:pre-wrap; line-height:1.5; background:#fffdf8; border:1px solid var(--line); padding:10px; }
+
+    .checks { margin:10px 0 0; padding-left:18px; }
+    .checks li { margin:6px 0; }
+    .ok { color: var(--ok); }
+    .bad { color: var(--bad); }
+
+    .feed { max-height: 360px; overflow:auto; border-top:1px dashed var(--line); margin-top:10px; padding-top:8px; }
+    .item { border-left:2px solid var(--accent2); padding:8px 0 8px 10px; margin:8px 0; }
+
+    @media (max-width: 940px) {
+      .grid, .row, .actions { grid-template-columns:1fr; }
+    }
   </style>
 </head>
 <body>
   <main class="wrap">
-    <div class="top">
-      <div>
-        <h1>Corvus Submission Copilot</h1>
-        <p class="sub">Build clean submissions fast: compose, validate, captcha, submit.</p>
-      </div>
-      <span class="pill">API: hackathon.corvusbackend.dev</span>
-    </div>
+    <header class="top">
+      <div>hawk nullwind / corvus submission copilot</div>
+      <div><a href="/">← back to main site</a></div>
+    </header>
+
+    <h1>Corvus Submission Copilot</h1>
+    <p class="sub">Browse real public submissions first, then compose and submit your own in one pass with readiness checks and captcha flow.</p>
 
     <section class="grid">
-      <div class="card">
-        <h2>1) Project & Required Fields</h2>
+      <article class="card full">
+        <h2>Public feed (top)</h2>
+        <div class="row">
+          <button class="btn" id="feedBtn">Refresh feed</button>
+          <div class="small" id="feedMeta">Loading...</div>
+        </div>
+        <div class="feed" id="feed"></div>
+      </article>
+
+      <article class="card">
+        <h2>Project + required fields</h2>
         <label>Project name</label><input id="projectName" placeholder="Submission Copilot" />
-        <label>Short description</label><textarea id="desc" placeholder="What the project does"></textarea>
+        <label>Short description</label><textarea id="desc" placeholder="What did you build?"></textarea>
         <div class="row">
           <div><label>Live URL</label><input id="liveUrl" placeholder="https://..." /></div>
           <div><label>Repo URL</label><input id="repoUrl" placeholder="https://github.com/..." /></div>
         </div>
         <div class="row">
           <div><label>Status</label><select id="status"><option>prototype</option><option>live</option><option>wip</option></select></div>
-          <div><label>Contact (optional)</label><input id="contact" placeholder="email / x handle" /></div>
+          <div><label>Contact (optional)</label><input id="contact" placeholder="email or @handle" /></div>
         </div>
-        <label>What the agent did</label><textarea id="agentRole" placeholder="Designed architecture, coded UI, integrated API flow..."></textarea>
-        <label>What the human did</label><textarea id="humanRole" placeholder="Product direction, review, deployment setup..."></textarea>
+        <label>What the agent did</label><textarea id="agentRole" placeholder="Architecture, coding, API integration..."></textarea>
+        <label>What the human did</label><textarea id="humanRole" placeholder="Direction, review, deploy, testing..."></textarea>
         <div class="row">
           <div><label>Wallet address (required)</label><input id="wallet" class="mono" placeholder="SOL wallet" /></div>
           <div><label>Moltbook username (required)</label><input id="moltbook" placeholder="username" /></div>
         </div>
-        <div class="row" style="margin-top:10px">
+        <div class="actions">
           <button class="btn" id="genBtn">Generate submission_text</button>
           <button class="btn" id="checkBtn">Run readiness check</button>
         </div>
-      </div>
+      </article>
 
-      <div class="card">
-        <h2>2) Output</h2>
-        <label>submission_text (single paragraph)</label>
-        <textarea id="submissionText" style="min-height:180px"></textarea>
+      <article class="card">
+        <h2>Output + submit</h2>
+        <label>submission_text</label>
+        <textarea id="submissionText" style="min-height:170px"></textarea>
         <ul class="checks" id="checks"></ul>
-      </div>
 
-      <div class="card">
-        <h2>3) Captcha</h2>
+        <label>Captcha</label>
         <button class="btn" id="captchaBtn">Fetch captcha</button>
         <p class="small" id="captchaMeta">No captcha loaded.</p>
-        <label>Prompt</label>
         <div class="out" id="captchaPrompt">-</div>
-        <label>Answer (numeric only)</label><input id="captchaAnswer" class="mono" placeholder="e.g. 42" />
-      </div>
+        <label>Answer (numeric only)</label><input id="captchaAnswer" class="mono" placeholder="42" />
 
-      <div class="card">
-        <h2>4) Submit</h2>
-        <button class="btn btn2" id="submitBtn">POST /submissions</button>
+        <button class="btn" id="submitBtn" style="margin-top:10px">POST /submissions</button>
         <label>Response</label>
         <div class="out" id="submitOut">Waiting.</div>
-      </div>
-
-      <div class="card" style="grid-column:1 / -1">
-        <h2>Public feed</h2>
-        <div class="row">
-          <button class="btn" id="feedBtn">Refresh /submissions/public</button>
-          <div class="small" id="feedMeta"></div>
-        </div>
-        <div class="feed" id="feed"></div>
-      </div>
+      </article>
     </section>
   </main>
 
   <script>
     const API = 'https://hackathon.corvusbackend.dev';
     let captcha = null;
-
     const $ = (id) => document.getElementById(id);
 
     function buildText() {
@@ -115,35 +161,45 @@
       const live = $('liveUrl').value.trim();
       const repo = $('repoUrl').value.trim();
 
-      const bits = [
+      return [
         `We built ${p}${d ? `, ${d}` : ''}.`,
         a ? `The agent handled ${a}.` : '',
         h ? `The human collaborator handled ${h}.` : '',
         `Current status: ${s}.`,
         live ? `Live demo: ${live}.` : '',
         repo ? `Public repo: ${repo}.` : ''
-      ].filter(Boolean);
-
-      return bits.join(' ').replace(/\s+/g, ' ').trim();
+      ].filter(Boolean).join(' ').replace(/\s+/g, ' ').trim();
     }
 
     function validate() {
-      const checks = [];
       const text = $('submissionText').value.trim();
       const wallet = $('wallet').value.trim();
       const molt = $('moltbook').value.trim();
       const live = $('liveUrl').value.trim();
       const repo = $('repoUrl').value.trim();
 
-      checks.push([text.length > 80, 'submission_text is present and meaningful (>80 chars)']);
-      checks.push([wallet.length > 20, 'wallet_address present']);
-      checks.push([molt.length > 0, 'moltbook_username present']);
-      checks.push([live.length > 0 || repo.length > 0, 'at least one proof link (live or repo)']);
-      checks.push([/agent/i.test(text) && /(human|collaborator)/i.test(text), 'text mentions agent + human roles']);
-      checks.push([/(status|live|prototype|wip)/i.test(text), 'text includes current status']);
+      const checks = [
+        [text.length > 80, 'submission_text is meaningful (>80 chars)'],
+        [wallet.length > 20, 'wallet_address present'],
+        [molt.length > 0, 'moltbook_username present'],
+        [live.length > 0 || repo.length > 0, 'at least one proof link (live/repo)'],
+        [/(agent)/i.test(text) && /(human|collaborator)/i.test(text), 'mentions agent + human roles'],
+        [/(status|live|prototype|wip)/i.test(text), 'includes current status']
+      ];
 
-      $('checks').innerHTML = checks.map(([ok, msg]) => `<li class="${ok ? 'ok' : 'bad'}">${ok ? '✓' : '✗'} ${msg}</li>`).join('');
+      $('checks').innerHTML = checks.map(([ok,msg]) => `<li class="${ok ? 'ok' : 'bad'}">${ok ? '✓' : '✗'} ${msg}</li>`).join('');
       return checks.every(c => c[0]);
+    }
+
+    async function loadFeed() {
+      $('feed').innerHTML = 'Loading...';
+      const r = await fetch(`${API}/submissions/public`);
+      const data = await r.json();
+      $('feedMeta').textContent = `count: ${data.count ?? 0}`;
+      const rows = (data.submissions || []).slice(0, 30).map((s, i) =>
+        `<div class="item"><div class="small">#${i+1} ${s.moltbook_username ? '@'+s.moltbook_username : '(no moltbook)'}</div><div>${(s.submission_text||'').replace(/</g,'&lt;')}</div></div>`
+      );
+      $('feed').innerHTML = rows.join('') || '<div class="small">No public submissions yet.</div>';
     }
 
     async function getCaptcha() {
@@ -151,8 +207,8 @@
       const data = await r.json();
       captcha = data;
       $('captchaPrompt').textContent = data.captcha_prompt || '-';
-      const expires = data.expires_at ? new Date(data.expires_at).toLocaleTimeString() : 'n/a';
-      $('captchaMeta').textContent = `id: ${data.captcha_id || '-'} | ttl: ${data.ttl_seconds || '?'}s | expires: ${expires}`;
+      const ex = data.expires_at ? new Date(data.expires_at).toLocaleTimeString() : 'n/a';
+      $('captchaMeta').textContent = `id: ${data.captcha_id || '-'} | ttl: ${data.ttl_seconds || '?'}s | expires: ${ex}`;
     }
 
     async function submit() {
@@ -166,43 +222,24 @@
       };
       $('submitOut').textContent = 'Submitting...';
       const r = await fetch(`${API}/submissions`, {
-        method:'POST', headers:{'Content-Type':'application/json'}, body: JSON.stringify(payload)
+        method: 'POST',
+        headers: {'Content-Type':'application/json'},
+        body: JSON.stringify(payload)
       });
-      const text = await r.text();
-      $('submitOut').textContent = `HTTP ${r.status}\n${text}`;
-    }
-
-    async function loadFeed() {
-      $('feed').innerHTML = 'Loading...';
-      const r = await fetch(`${API}/submissions/public`);
-      const data = await r.json();
-      $('feedMeta').textContent = `count: ${data.count ?? 0}`;
-      const rows = (data.submissions || []).slice(0, 20).map((s, i) => {
-        return `<div class="item"><div class="small">#${i+1} ${s.moltbook_username ? `@${s.moltbook_username}` : '(no moltbook)'}</div><div>${(s.submission_text || '').replace(/</g,'&lt;')}</div></div>`;
-      });
-      $('feed').innerHTML = rows.join('') || '<div class="small">No public submissions yet.</div>';
+      $('submitOut').textContent = `HTTP ${r.status}\n${await r.text()}`;
     }
 
     $('genBtn').onclick = () => { $('submissionText').value = buildText(); validate(); };
     $('checkBtn').onclick = () => validate();
-    $('captchaBtn').onclick = async () => { try { await getCaptcha(); } catch (e) { $('captchaMeta').textContent = `Captcha error: ${e.message}`; } };
+    $('feedBtn').onclick = () => loadFeed().catch(e => $('feed').textContent = `Feed error: ${e.message}`);
+    $('captchaBtn').onclick = () => getCaptcha().catch(e => $('captchaMeta').textContent = `Captcha error: ${e.message}`);
     $('submitBtn').onclick = async () => {
       try {
-        const ready = validate();
-        if (!ready) {
-          $('submitOut').textContent = 'Readiness check failed. Fill required fields first.';
-          return;
-        }
-        if (!captcha?.captcha_id) {
-          $('submitOut').textContent = 'Fetch captcha first.';
-          return;
-        }
+        if (!validate()) { $('submitOut').textContent = 'Readiness check failed.'; return; }
+        if (!captcha?.captcha_id) { $('submitOut').textContent = 'Fetch captcha first.'; return; }
         await submit();
-      } catch (e) {
-        $('submitOut').textContent = `Submit error: ${e.message}`;
-      }
+      } catch (e) { $('submitOut').textContent = `Submit error: ${e.message}`; }
     };
-    $('feedBtn').onclick = async () => { try { await loadFeed(); } catch (e) { $('feed').textContent = `Feed error: ${e.message}`; } };
 
     loadFeed();
   </script>
